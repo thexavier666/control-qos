@@ -58,16 +58,17 @@ def spawnCont(image_name,cont_name=None,port=0):
 	if image_name[:2]=='fi':
 		cont= client.containers.run(image='fio_ubuntu:v5',remove=True,detach=True,privileged=True,tty=True,volumes={'/mnt/': {'bind': '/fio_out', 'mode': 'rw' }} )
 
-		#fio_cont_id = os.popen("docker ps | grep fio_ubuntu:v5 | awk '{print $1}'")
-		#fio_cont_id_str = fio_cont_id.read().strip()
-		#os.popen("docker exec -it {} sh /bin/fiojob.sh".format(fio_cont_id_str))
+		time.sleep(3)
+		fio_cont_id = os.popen("docker ps | grep fio_ubuntu:v5 | head -n 1 | awk '{print $1}'")
+		fio_cont_id_str = fio_cont_id.read().strip()
+		os.popen("docker exec -it {} sh /bin/fiojob.sh".format(fio_cont_id_str))
 
-		fio_cmd_str = "sudo fio --name=/mnt/randwrite_work --rw=randwrite --direct=1 --ioengine=libaio --bs=8M --numjobs=50 --size=8G"
+		#fio_cmd_str = "sudo fio --name=/mnt/randwrite_work --rw=randwrite --direct=1 --ioengine=libaio --bs=8M --numjobs=50 --size=8G"
 
-		import subprocess as sp
-		sp.Popen(fio_cmd_str,shell=True)
+		#import subprocess as sp
+		#sp.Popen(fio_cmd_str,shell=True)
 
-		print("FIO cmd = {}".format(fio_cmd_str))
+		#print("FIO cmd = {}".format(fio_cmd_str))
 
 		logger.info( 'started FIO container {}'.format(cont_name) )
 
@@ -77,8 +78,8 @@ def spawnCont(image_name,cont_name=None,port=0):
 
 	return {cont.name:HOST_IP}
 
-def startAB(ab_to,port,file_name,duration=180):
-	os.popen('sudo docker run --rm jordi/ab -c 1 -t {0} http://10.72.22.{1}:{2}/hostedFiles/{3} > ~/Container_Work/database/ab_out_{1}_{2}_{3}.txt'.format(duration,ab_to,port,file_name) )	
+def startAB(ab_to,port,file_name,duration=150):
+	os.popen('sudo docker run --rm jordi/ab -c 10 -t {0} http://10.72.22.{1}:{2}/hostedFiles/{3} > ~/Container_Work/database/ab_out_{1}_{2}_{3}.txt'.format(duration,ab_to,port,file_name) )	
 	logger.info( 'started AB container' )
 
 def killCont(cont_name):
