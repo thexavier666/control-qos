@@ -1,0 +1,7 @@
+__init__.py
+*.pyc
+__pycache__/*
+code/global_manager.log
+database/*
+*.txt
+*.swp

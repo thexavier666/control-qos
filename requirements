@@ -1,0 +1,8 @@
+requests==2.18.4
+matplotlib==3.0.2
+numpy==1.16.0
+simple_pid==0.2.1
+pandas==0.24.1
+psutil==5.6.2
+bottle==0.12.16
+docker==4.0.1
