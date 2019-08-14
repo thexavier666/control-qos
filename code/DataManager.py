@@ -7,11 +7,12 @@ import psutil
 import pandas as pd
 import numpy as np
 import logging,requests
+import subprocess as sp
 client = docker.from_env()
 
 # Folder Structure
 DIRECTORY='database'
-PROJECT_HOME = '/home/test/Container_Work'
+PROJECT_HOME = '/home/test/container_qos_ndl'
 HOST_IP = 'http://{}'.format(os.popen("hostname -I | awk '{print $1}'").read().strip() )
 
 logger=logging.getLogger(__name__)
@@ -82,12 +83,14 @@ def logDelay(cont_name,port,interval=1):
 		try:
 			#os.popen("sudo tcpdump -i eth0 -w {0}/{1}_{2}.pcap dst port {3} >> {0}/tmp_out".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx),port) )
 			os.popen("sudo tcpdump -i eth0 -w {0}/{1}_{2}.pcap dst port {3} 2> /dev/null".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx),port) )
-			# print("sudo tcpdump -i eth0 -w {0}/{1}_{2}.pcap dst port {3}".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx),port))
+			#sp.call("sudo tcpdump -i eth0 -w {0}/{1}_{2}.pcap dst port {3} 2> /dev/null".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx),port), shell=True )
 
 			time.sleep(interval - ((time.time() - starttime) % interval))
 
 			os.system('sudo pkill tcpdump')
-			_=os.popen("tshark -r {0}/{1}_{2}.pcap -T fields -e frame.time_epoch > {0}/{1}.csv 2> /dev/null".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx) )).read()
+			#sp.call('sudo pkill tcpdump', shell=True)
+			#_=os.popen("tshark -r {0}/{1}_{2}.pcap -T fields -e frame.time_epoch > {0}/{1}.csv 2> /dev/null".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx) )).read()
+			sp.call("tshark -r {0}/{1}_{2}.pcap -T fields -e frame.time_epoch > {0}/{1}.csv 2> /dev/null".format( os.path.join(PROJECT_HOME,DIRECTORY),cont_name,int(num_idx) ), shell=True)
 
 			try:
 				df=pd.read_csv('{}/{}.csv'.format(  os.path.join(PROJECT_HOME,DIRECTORY) ,cont_name),header=None).astype(float)
@@ -99,7 +102,8 @@ def logDelay(cont_name,port,interval=1):
 			#fout.write( str( time.time() )+','+str(np.mean(delays))+'\n' )
 			fout.write( str(np.mean(delays))+'\n' )
 			fout.flush()
-		except:
+		except Exception as ex:
+			print(ex)
 			logger.exception('logDelay ERROR:')
 
 def returnMetric(metric_name,cont_name=None):

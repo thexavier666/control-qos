@@ -6,12 +6,16 @@ import os
 
 # Folder Structure Paths
 # directory='database'
-# PROJECT_HOME = '/home/kaustavc/Container_Work'
+# PROJECT_HOME = '/home/kaustavc/cd container_qos_ndl'
 
 def startLocalManager(policy_status):    
-    # os.popen("sudo python3 {0} >> {1}/dm_errors".format('~/Container_Work/code/LocalManager.py','~/Container_Work/database') )
-    os.popen("sudo python3 {0} {1}".format('~/Container_Work/code/LocalManager.py', policy_status))
+    # os.popen("sudo python3 {0} >> {1}/dm_errors".format('~/cd container_qos_ndl/code/LocalManager.py','~/cd container_qos_ndl/database') )
+    os.popen("sudo python3 {0} {1}".format('~/container_qos_ndl/code/LocalManager.py', policy_status))
     return "Local Manager Started!"
+
+def startDataManager():
+	os.popen("sudo python3 {}".format('~/container_qos_ndl/code/DataManager.py'))
+	return "DM Started!"
 
 def killLocalManager():
     # shutdown gracefully
@@ -37,6 +41,7 @@ if __name__ == '__main__':
 	# 	GM CONTROL OPERATIONS  ------------------------
 
 	route('/startLM/<policy_status>')(startLocalManager)
+	route('/startDM')(startDataManager)
 	route('/killLM')(killLocalManager)
 
 	# Spawn a container using image name and optionally container_name (during migration)

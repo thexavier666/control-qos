@@ -25,6 +25,7 @@ def excepthook(*args):
 
 sys.excepthook = excepthook
 
+MAX_BW = 10000
 
 ## LOGGING FOR METRICS	
 # perf_metrics=logging.getLogger(__name__)  
@@ -79,7 +80,7 @@ def spawnCont(image_name,cont_name=None,port=0):
 	return {cont.name:HOST_IP}
 
 def startAB(ab_to,port,file_name,duration=150):
-	os.popen('sudo docker run --rm jordi/ab -c 10 -t {0} http://10.72.22.{1}:{2}/hostedFiles/{3} > ~/Container_Work/database/ab_out_{1}_{2}_{3}.txt'.format(duration,ab_to,port,file_name) )	
+	os.popen('sudo docker run --rm jordi/ab -c 10 -t {0} http://10.72.22.{1}:{2}/hostedFiles/{3} > ~/container_qos_ndl/database/ab_out_{1}_{2}_{3}.txt'.format(duration,ab_to,port,file_name) )	
 	logger.info( 'started AB container' )
 
 def killCont(cont_name):
@@ -153,7 +154,7 @@ def initialBandwidth():
 	num_servers=len(nw_conts)
 
 	try:
-		init_bw=int(900/num_servers)
+		init_bw=int(MAX_BW/num_servers)
 		
 		for cont in nw_conts:		
 			allocateBandwidth(cont,init_bw)
@@ -198,7 +199,7 @@ def resolve(cont_name):
 
 		# CAPACITY = 900 MBit			 						
 		for other_nw in nw_conts:
-			new_bw= (last_pid[other_nw]/sum_pid) * 900 
+			new_bw= (last_pid[other_nw]/sum_pid) * MAX_BW 
 			allocateBandwidth(cont_name=other_nw,new_bandwidth=new_bw)		
 			logger.info("Assigned new BW {} to {}".format(new_bw,other_nw) ) 			
 			if other_nw==cont_name:
@@ -289,18 +290,19 @@ def recentPID(cont_name):
 		return action[cont_name][-1]
 
 def exit_handler():
+	print("Kill zone")
 	exited= True
 	runs = os.popen('pgrep -f  DataManager.py').read()
-	os.popen('sudo kill -9 {}'.format(' '.join(runs.split('\n')) ) )
+	#os.popen('sudo kill -9 {}'.format(' '.join(runs.split('\n')) ) )
 	os.system('sudo pkill tcpdump')
 	os.system('sudo kill -9 $(pgrep -f dstat)')
 	# print("CLOSED")
 	logger.info('LM CLOSED')	
 
 if __name__ == '__main__':
-	atexit.register(exit_handler)
-	os.popen("sudo python3 {0} ".format('~/Container_Work/code/DataManager.py') )
-	logger.info("STARTED DM")
+	#atexit.register(exit_handler)
+	#os.popen("sudo python3 {0} ".format('~/container_qos_ndl/code/DataManager.py') )
+	#logger.info("STARTED DM")
 
 	pid_hist = open( os.path.join(PROJECT_HOME,DIRECTORY,'PID.actions'),'w')
 	state_hist=open( os.path.join(PROJECT_HOME,DIRECTORY,'State_History'),'w')
